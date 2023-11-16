@@ -21,4 +21,19 @@ Use data from database to create a dashboard that will give the business owner a
 
 ---
 
+## Screenshots
+
+### Customer Table
 ![alt text](https://github.com/nito0415/BUS_395_SCRUM/blob/main/supp_files/Screenshot%202023-11-16%20at%2000.10.24.png?raw=true)
+
+### Orders Table
+![alt text](INSERT LINK HERE)
+
+### Cost Table
+![alt text](INSERT LINK HERE)
+
+### Items Table
+![alt text](INSERT LINK HERE)
+
+### Employee Table
+![alt text](INSERT LINK HERE)
