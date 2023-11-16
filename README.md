@@ -7,6 +7,7 @@
 ## Sprint 1: In Progress
 
 PBI: Priority 
+
 - [] Create SQL database with appropriate tables and do calculations that highlight high-cost items.
 
 - [] Access database within Python and run reports for user highlighting frequency of sold products.
