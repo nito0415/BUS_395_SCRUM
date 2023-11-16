@@ -47,3 +47,6 @@ PBI: Priority
 
 ### Employee Table
 ![alt text](https://github.com/nito0415/BUS_395_SCRUM/blob/main/supp_files/Screenshot%202023-11-16%20at%2000.23.28.png?raw=true)
+
+### Profit by Item
+![alt text](INSERT LINK HERE)
