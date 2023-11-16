@@ -1,3 +1,4 @@
+import os
 import tkinter as tk
 from tkinter import ttk, scrolledtext
 import sqlite3
@@ -73,28 +74,46 @@ class CoffeeShopGUI:
         self.master = master
         master.title("Coffee Shop Management")
 
-        self.text_area = scrolledtext.ScrolledText(master, wrap=tk.WORD, width=40, height=10)
-        self.text_area.pack(pady=10)
+        # Add an icon to the window
+        icon_path = os.path.abspath("plastic-coffee-cup.193x256.png")
+        if os.path.exists(icon_path):
+            icon = tk.PhotoImage(file=icon_path)
+            master.iconphoto(True, icon)
+        else:
+            print(f"Icon not found at path: {icon_path}")
 
-        self.result_tree = ttk.Treeview(master, columns=('Item ID', 'Item Name', 'Value'), show='headings')
+        self.create_widgets()
+
+        self.database = Database()
+
+    def create_widgets(self):
+        # Text area
+        self.text_area = scrolledtext.ScrolledText(self.master, wrap=tk.WORD, width=40, height=10)
+        self.text_area.pack(fill=tk.BOTH, expand=True, pady=10)
+
+        # Themed buttons
+        style = ttk.Style()
+        style.configure("TButton", padding=6, relief="flat", background="#ccc")
+
+        # Buttons
+        self.execute_button = ttk.Button(self.master, text="Execute Query", command=self.execute_query, style="TButton")
+        self.execute_button.pack(pady=5)
+
+        self.profit_button = ttk.Button(self.master, text="Get Profit by Item", command=self.get_profit_by_item, style="TButton")
+        self.profit_button.pack(pady=5)
+
+        self.highest_cost_button = ttk.Button(self.master, text="Highlight Highest Cost Items", command=self.highlight_highest_cost_items, style="TButton")
+        self.highest_cost_button.pack(pady=5)
+
+        self.exit_button = ttk.Button(self.master, text="Exit", command=self.master.quit, style="TButton")
+        self.exit_button.pack(pady=5)
+
+        # Result Tree
+        self.result_tree = ttk.Treeview(self.master, columns=('Item ID', 'Item Name', 'Value'), show='headings')
         self.result_tree.heading('Item ID', text='Item ID')
         self.result_tree.heading('Item Name', text='Item Name')
         self.result_tree.heading('Value', text='Value')
-        self.result_tree.pack(pady=10)
-
-        self.execute_button = tk.Button(master, text="Execute Query", command=self.execute_query)
-        self.execute_button.pack()
-
-        self.profit_button = tk.Button(master, text="Get Profit by Item", command=self.get_profit_by_item)
-        self.profit_button.pack()
-
-        self.highest_cost_button = tk.Button(master, text="Highlight Highest Cost Items", command=self.highlight_highest_cost_items)
-        self.highest_cost_button.pack()
-
-        self.exit_button = tk.Button(master, text="Exit", command=self.master.quit)
-        self.exit_button.pack()
-
-        self.database = Database()
+        self.result_tree.pack(fill=tk.BOTH, expand=True, pady=10, padx=10)
 
     def display_results(self, column_names, data):
         self.result_tree.delete(*self.result_tree.get_children())
@@ -149,6 +168,10 @@ class CoffeeShopGUI:
 def main():
     root = tk.Tk()
     gui = CoffeeShopGUI(root)
+    
+    # Set a fixed size for the window
+    root.geometry("800x600")
+    
     root.mainloop()
 
 if __name__ == "__main__":
