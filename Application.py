@@ -1,6 +1,6 @@
 import os
 import tkinter as tk
-from tkinter import ttk, scrolledtext
+from tkinter import ttk, scrolledtext, messagebox
 import sqlite3
 
 class Database:
@@ -101,6 +101,7 @@ class CoffeeShopGUI:
         # Themed buttons
         style = ttk.Style()
         style.configure("TButton", padding=6, relief="flat", background="#ccc")
+        style.configure("Exit.TButton", padding=6, relief="flat", background="red")
 
         # Buttons
         self.execute_button = ttk.Button(self.master, text="Execute Query", command=self.execute_query, style="TButton")
@@ -112,7 +113,7 @@ class CoffeeShopGUI:
         self.highest_cost_button = ttk.Button(self.master, text="Highlight Highest Cost Items", command=self.highlight_highest_cost_items, style="TButton")
         self.highest_cost_button.pack(pady=5)
 
-        self.exit_button = ttk.Button(self.master, text="Exit", command=self.master.quit, style="TButton")
+        self.exit_button = ttk.Button(self.master, text="Exit", command=self.confirm_exit, style="Exit.TButton")
         self.exit_button.pack(pady=5)
 
         # Result Tree
@@ -142,17 +143,16 @@ class CoffeeShopGUI:
         user_input = self.text_area.get("1.0", tk.END).strip()
 
         if user_input.lower() == 'exit':
-            self.master.quit()
-
-        print(f"Executing query: {user_input}")
-
-        try:
-            column_names, result = self.database.execute_query(user_input)
-            if result is not None:
-                self.display_results(column_names, result)
-        except sqlite3.Error as e:
-            self.result_tree.delete(*self.result_tree.get_children())
-            print(f"Error executing query: {e}")
+            self.confirm_exit()
+        else:
+            print(f"Executing query: {user_input}")
+            try:
+                column_names, result = self.database.execute_query(user_input)
+                if result is not None:
+                    self.display_results(column_names, result)
+            except sqlite3.Error as e:
+                self.result_tree.delete(*self.result_tree.get_children())
+                print(f"Error executing query: {e}")
 
     def get_profit_by_item(self):
         try:
@@ -172,12 +172,22 @@ class CoffeeShopGUI:
             self.result_tree.delete(*self.result_tree.get_children())
             print(f"Error executing query: {e}")
 
+    def confirm_exit(self):
+        result = messagebox.askyesno("Confirm Exit", "Are you sure you want to exit?")
+        if result:
+            self.master.quit()
+
 def main():
     root = tk.Tk()
+
+    # Set up the style for the Exit button
+    style = ttk.Style()
+    style.configure("Exit.TButton", padding=6, relief="flat", background="red")
+
     gui = CoffeeShopGUI(root)
     
     # Set a fixed size for the window
-    root.geometry("800x600")
+    root.geometry("1000x800")
     
     root.mainloop()
 
