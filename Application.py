@@ -55,7 +55,6 @@ class Database:
             FROM item i
             JOIN cost_to_make c ON i.item_id = c.item_id
             ORDER BY c.total_cost_to_make DESC
-            LIMIT 5
         """
         try:
             result = self.cursor.execute(query).fetchall()
@@ -75,7 +74,7 @@ class CoffeeShopGUI:
         master.title("Coffee Shop Management")
 
         # Add an icon to the window
-        icon_path = os.path.abspath("plastic-coffee-cup.193x256.png")
+        icon_path = os.path.abspath("supp_files/plastic-coffee-cup.193x256.png")
         if os.path.exists(icon_path):
             icon = tk.PhotoImage(file=icon_path)
             master.iconphoto(True, icon)
