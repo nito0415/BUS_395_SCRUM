@@ -18,3 +18,5 @@ Use data from database to create a dashboard that will give the business owner a
 | ----------- | ----------- | ----------- | ----------- | ----------- |
 | 1 | 1.2 | 5 | Done | Dylan |
 | 2 | 2.2 | 15 | In Progress | Tanner, Juan, Chepe |
+
+![alt text](https://github.com/nito0415/BUS_395_SCRUM.git/blob/main/image.jpg?raw=true)
