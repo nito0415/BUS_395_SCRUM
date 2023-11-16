@@ -8,7 +8,13 @@
 
 PBI: Priority 
 
-- [] Create SQL database with appropriate tables and do calculations that highlight high-cost items.
+- [x] Create a SQL database and access it within Python.
+
+- [x] Create a GUI for the user to interact with the database.
+
+- [ ] Make the GUI more user friendly.
+
+- [] Use python to fetch appropriate tables and do calculations that highlight high-cost items.
 
 - [] Access database within Python and run reports for user highlighting frequency of sold products.
 
