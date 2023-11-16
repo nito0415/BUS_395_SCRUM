@@ -1,19 +1,34 @@
 import sqlite3
 
-# Connect to the SQLite database (create one if it doesn't exist)
-with sqlite3.connect('data.db') as conn:
-    # Create a cursor object to execute SQL queries
-    cursor = conn.cursor()
+def connect_to_database(db):
+    return sqlite3.connect(db)
 
-    # Read the SQL file
-    with open('SCRUM Project Sprint 1 Creating Tables.sql', 'r') as sql_file:
-        sql_queries = sql_file.read()
+def execute_query(connection, query):
+    cursor = connection.cursor()
+    cursor.execute(query)
+    return cursor.fetchall()
 
-    # Execute the SQL statements
-    try:
-        cursor.executescript(sql_queries)
-    except sqlite3.Error as e:
-        print(f"An error occurred: {e}")
-    else:
-        # Commit the changes
-        conn.commit()
+def print_report(data):
+    for row in data:
+        print(row)
+
+def main():
+    data = 'data.db'
+    connection = connect_to_database(data)
+
+    while True:
+        user_input = input("Enter SQL query (or 'exit' to quit): ")
+
+        if user_input.lower() == 'exit':
+            break
+
+        try:
+            result = execute_query(connection, user_input)
+            print_report(result)
+        except sqlite3.Error as e:
+            print(f"Error executing query: {e}")
+
+    connection.close()
+
+if __name__ == "__main__":
+    main()
