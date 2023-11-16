@@ -46,6 +46,24 @@ class Database:
             print(f"An error occurred: {e}")
             return None, None
 
+    def highlight_highest_cost_items(self):
+        query = """
+            SELECT i.item_id,
+                   i.item_name,
+                   c.total_cost_to_make
+            FROM item i
+            JOIN cost_to_make c ON i.item_id = c.item_id
+            ORDER BY c.total_cost_to_make DESC
+            LIMIT 5
+        """
+        try:
+            result = self.cursor.execute(query).fetchall()
+            column_names = [description[0] for description in self.cursor.description]
+            return column_names, result
+        except sqlite3.Error as e:
+            print(f"An error occurred: {e}")
+            return None, None
+
     def __del__(self):
         if self.connection:
             self.connection.close()
@@ -58,13 +76,10 @@ class CoffeeShopGUI:
         self.text_area = scrolledtext.ScrolledText(master, wrap=tk.WORD, width=40, height=10)
         self.text_area.pack(pady=10)
 
-        self.result_tree = ttk.Treeview(master, columns=('Item ID', 'Item Name', 'Total Sold', 'Total Revenue', 'Total Cost', 'Total Profit'), show='headings')
+        self.result_tree = ttk.Treeview(master, columns=('Item ID', 'Item Name', 'Value'), show='headings')
         self.result_tree.heading('Item ID', text='Item ID')
         self.result_tree.heading('Item Name', text='Item Name')
-        self.result_tree.heading('Total Sold', text='Total Sold')
-        self.result_tree.heading('Total Revenue', text='Total Revenue')
-        self.result_tree.heading('Total Cost', text='Total Cost')
-        self.result_tree.heading('Total Profit', text='Total Profit')
+        self.result_tree.heading('Value', text='Value')
         self.result_tree.pack(pady=10)
 
         self.execute_button = tk.Button(master, text="Execute Query", command=self.execute_query)
@@ -72,6 +87,9 @@ class CoffeeShopGUI:
 
         self.profit_button = tk.Button(master, text="Get Profit by Item", command=self.get_profit_by_item)
         self.profit_button.pack()
+
+        self.highest_cost_button = tk.Button(master, text="Highlight Highest Cost Items", command=self.highlight_highest_cost_items)
+        self.highest_cost_button.pack()
 
         self.exit_button = tk.Button(master, text="Exit", command=self.master.quit)
         self.exit_button.pack()
@@ -113,6 +131,15 @@ class CoffeeShopGUI:
     def get_profit_by_item(self):
         try:
             column_names, result = self.database.get_profit_by_item()
+            if result is not None:
+                self.display_results(column_names, result)
+        except sqlite3.Error as e:
+            self.result_tree.delete(*self.result_tree.get_children())
+            print(f"Error executing query: {e}")
+
+    def highlight_highest_cost_items(self):
+        try:
+            column_names, result = self.database.highlight_highest_cost_items()
             if result is not None:
                 self.display_results(column_names, result)
         except sqlite3.Error as e:
