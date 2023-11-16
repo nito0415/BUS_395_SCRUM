@@ -27,13 +27,13 @@ Use data from database to create a dashboard that will give the business owner a
 ![alt text](https://github.com/nito0415/BUS_395_SCRUM/blob/main/supp_files/Screenshot%202023-11-16%20at%2000.10.24.png?raw=true)
 
 ### Orders Table
-![alt text](INSERT LINK HERE)
+![alt text](https://github.com/nito0415/BUS_395_SCRUM/blob/main/supp_files/Screenshot%202023-11-16%20at%2000.21.17.png?raw=true)
 
 ### Cost Table
-![alt text](INSERT LINK HERE)
+![alt text](https://github.com/nito0415/BUS_395_SCRUM/blob/main/supp_files/Screenshot%202023-11-16%20at%2000.22.12.png?raw=true)
 
 ### Items Table
-![alt text](INSERT LINK HERE)
+![alt text](https://github.com/nito0415/BUS_395_SCRUM/blob/main/supp_files/Screenshot%202023-11-16%20at%2000.22.45.png?raw=true)
 
 ### Employee Table
-![alt text](INSERT LINK HERE)
+![alt text](https://github.com/nito0415/BUS_395_SCRUM/blob/main/supp_files/Screenshot%202023-11-16%20at%2000.23.28.png?raw=true)
