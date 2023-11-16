@@ -29,20 +29,28 @@ class Database:
         query = """
             SELECT o.item_id,
                    i.item_name,
-                   SUM(o.quantity) AS total_sold,
-                   SUM(o.total_price) AS total_revenue,
-                   SUM(c.total_cost_to_make * o.quantity) AS total_cost,
-                   SUM(o.total_price - (c.total_cost_to_make * o.quantity)) AS total_profit
+                   ROUND(SUM(o.quantity), 2) AS total_sold,
+                   ROUND(SUM(o.total_price), 2) AS total_revenue,
+                   ROUND(SUM(c.total_cost_to_make * o.quantity), 2) AS total_cost,
+                   ROUND(SUM(o.total_price - (c.total_cost_to_make * o.quantity)), 2) AS total_profit
             FROM orders o
             JOIN item i ON o.item_id = i.item_id
             JOIN cost_to_make c ON o.item_id = c.item_id
             GROUP BY o.item_id, i.item_name
-            ORDER BY total_profit DESC
+            ORDER BY (total_profit / total_revenue) DESC
         """
         try:
             result = self.cursor.execute(query).fetchall()
             column_names = [description[0] for description in self.cursor.description]
-            return column_names, result
+
+            # Calculate gross profit percentage and add it to the result
+            result_with_percentage = []
+            for row in result:
+                item_id, item_name, total_sold, total_revenue, total_cost, total_profit = row
+                gross_profit_percentage = (total_profit / total_revenue) * 100 if total_revenue != 0 else 0
+                result_with_percentage.append((item_id, item_name, round(total_sold, 2), round(total_revenue, 2), round(total_cost, 2), round(total_profit, 2), round(gross_profit_percentage, 2)))
+
+            return column_names + ['Gross Profit Percentage'], result_with_percentage
         except sqlite3.Error as e:
             print(f"An error occurred: {e}")
             return None, None
