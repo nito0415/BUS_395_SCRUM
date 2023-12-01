@@ -41,6 +41,7 @@ class Database:
                    ROUND(SUM(o.total_price), 2) AS total_revenue,
                    ROUND(SUM(c.total_cost_to_make * o.quantity), 2) AS total_cost,
                    ROUND(SUM(o.total_price - (c.total_cost_to_make * o.quantity)), 2) AS total_profit
+                  
             FROM orders o
             JOIN item i ON o.item_id = i.item_id
             JOIN cost_to_make c ON o.item_id = c.item_id

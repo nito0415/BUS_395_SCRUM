@@ -6,7 +6,7 @@ with sqlite3.connect('data.db') as conn:
     cursor = conn.cursor()
 
     # Read the SQL file
-    with open('SCRUM Project Sprint 1 Creating Tables.sql', 'r') as sql_file:
+    with open('SCRUM Project Sprint 1 Creating Tables (1).sql', 'r') as sql_file:
         sql_queries = sql_file.read()
 
     # Execute the SQL statements
