@@ -3,9 +3,27 @@ import os
 import tkinter as tk
 from tkinter import ttk, scrolledtext, messagebox
 import sqlite3
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
 
 # Database class for managing SQLite database operations
 class Database:
+    """
+    A class representing a database connection and operations.
+
+    Attributes:
+        connection (sqlite3.Connection): The connection to the SQLite database.
+        cursor (sqlite3.Cursor): The cursor for executing SQL queries.
+
+    Methods:
+        __init__(self, db_name='data.db'): Initializes the database connection and cursor.
+        connect_to_database(self, db_name): Connects to the SQLite database.
+        execute_query(self, query): Executes a query and fetches the results.
+        get_profit_by_item(self): Retrieves profit information by item.
+        highlight_highest_cost_items(self): Retrieves items with the highest cost to make.
+        __del__(self): Closes the database connection when the object is deleted.
+    """
     def __init__(self, db_name='data.db'):
         # Initialize the database connection and cursor
         self.connection = self.connect_to_database(db_name)
@@ -37,6 +55,7 @@ class Database:
         query = """
             SELECT o.item_id,
                    i.item_name,
+                   o.date_sold, 
                    ROUND(SUM(o.quantity), 2) AS total_sold,
                    ROUND(SUM(o.total_price), 2) AS total_revenue,
                    ROUND(SUM(c.total_cost_to_make * o.quantity), 2) AS total_cost,
@@ -56,9 +75,9 @@ class Database:
             # Calculate gross profit percentage and add it to the result
             result_with_percentage = []
             for row in result:
-                item_id, item_name, total_sold, total_revenue, total_cost, total_profit = row
+                item_id, item_name, date_sold, total_sold, total_revenue, total_cost, total_profit = row
                 gross_profit_percentage = (total_profit / total_revenue) * 100 if total_revenue != 0 else 0
-                result_with_percentage.append((item_id, item_name, round(total_sold, 2), round(total_revenue, 2), round(total_cost, 2), round(total_profit, 2), round(gross_profit_percentage, 2)))
+                result_with_percentage.append((item_id, item_name, str(date_sold), round(total_sold, 2), round(total_revenue, 2), round(total_cost, 2), round(total_profit, 2), round(gross_profit_percentage, 2)))
 
             return column_names + ['Gross Profit Percentage'], result_with_percentage
         except sqlite3.Error as e:
@@ -93,6 +112,28 @@ class Database:
 
 # GUI class for the Coffee Shop Management application
 class CoffeeShopGUI:
+    """
+    A class representing the graphical user interface for a coffee shop management application.
+
+    Attributes:
+        master (Tk): The root Tkinter window.
+        text_area (ScrolledText): The text area for user input.
+        execute_button (Button): The button for executing queries.
+        profit_button (Button): The button for getting profit by item.
+        highest_cost_button (Button): The button for highlighting highest cost items.
+        exit_button (Button): The button for exiting the application.
+        result_tree (Treeview): The Treeview widget for displaying query results.
+        database (Database): The database connection.
+
+    Methods:
+        __init__(self, master): Initializes the GUI.
+        create_widgets(self): Creates the GUI widgets.
+        display_results(self, column_names, data): Displays query results in the Treeview widget.
+        execute_query(self): Executes a user-entered SQL query and displays results.
+        get_profit_by_item(self): Displays profit information by item.
+        highlight_highest_cost_items(self): Highlights items with the highest cost to make.
+        confirm_exit(self): Confirms exit and closes the application if confirmed.
+    """
     def __init__(self, master):
         # Initialize the GUI
         self.master = master
@@ -135,12 +176,17 @@ class CoffeeShopGUI:
         self.exit_button = ttk.Button(self.master, text="Exit", command=self.confirm_exit, style="Exit.TButton")
         self.exit_button.pack(pady=5)
 
+
         # Create a Treeview widget for displaying query results
         self.result_tree = ttk.Treeview(self.master, columns=('Item ID', 'Item Name', 'Value'), show='headings')
         self.result_tree.heading('Item ID', text='Item ID')
         self.result_tree.heading('Item Name', text='Item Name')
         self.result_tree.heading('Value', text='Value')
         self.result_tree.pack(fill=tk.BOTH, expand=True, pady=10, padx=10)
+
+        # Create a Canvas for Matplotlib charts
+        self.canvas = tk.Canvas(self.master, width=500, height=300)
+        self.canvas.pack(pady=10)
 
     def display_results(self, column_names, data):
         # Display query results in the Treeview widget
@@ -158,6 +204,39 @@ class CoffeeShopGUI:
 
         for i, row in enumerate(data):
             self.result_tree.insert("", 'end', text=i + 1, values=row)
+
+        # Plot a bar chart for total revenue by item
+        self.plot_bar_chart(data)
+
+    def plot_bar_chart(self, data):
+        item_names = [row[1] for row in data]  # Assuming the item name is in the second column
+        total_revenue = [row[4] for row in data]  # Assuming the total revenue is in the fifth column
+
+        # Check if both item_names and total_revenue are non-empty
+        if not item_names or not total_revenue:
+            print("No data to plot.")
+            return
+
+        fig, ax = plt.subplots()
+        ax.bar(item_names, total_revenue, color='blue')
+        ax.set_xlabel('Item Name')
+        ax.set_ylabel('Total Revenue')
+        ax.set_title('Total Revenue by Item')
+
+        # Embed the Matplotlib figure in the Tkinter window
+        if hasattr(self, "canvas"):
+            self.canvas.get_tk_widget().destroy()  # Destroy any existing Matplotlib canvas
+
+        self.canvas = FigureCanvasTkAgg(fig, master=self.master)
+        self.canvas_widget = self.canvas.get_tk_widget()
+        self.canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+
+        # Ensure that the canvas is updated properly
+        self.canvas_widget.draw()
+        self.canvas_widget.flush_events()
+
+
+
 
     def execute_query(self):
         # Execute a user-entered SQL query and display results
@@ -207,7 +286,7 @@ def main():
 
     # Set up the style for the Exit button
     style = ttk.Style()
-    style.configure("Exit.TButton", padding=6, relief="flat", background="red")
+    style.configure("Exit.TButton", padding=6)
 
     # Create and run the CoffeeShopGUI instance
     gui = CoffeeShopGUI(root)
