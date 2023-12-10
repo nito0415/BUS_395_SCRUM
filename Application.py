@@ -153,9 +153,12 @@ class CoffeeShopGUI:
         # Initialize the database connection
         self.database = Database()
 
+        # Initialize the last_button_pressed attribute
+        self.last_button_pressed = None
+
     def create_widgets(self):
         # Create a scrolled text area for user input
-        self.text_area = scrolledtext.ScrolledText(self.master, wrap=tk.WORD, width=40, height=10)
+        self.text_area = scrolledtext.ScrolledText(self.master, wrap=tk.WORD, width=40, height=5)
         self.text_area.pack(fill=tk.BOTH, expand=True, pady=10)
 
         # Configure themed buttons
@@ -205,10 +208,27 @@ class CoffeeShopGUI:
         for i, row in enumerate(data):
             self.result_tree.insert("", 'end', text=i + 1, values=row)
 
-        # Plot a bar chart for total revenue by item
-        self.plot_bar_chart(data)
+        # Check which button was pressed and call the corresponding plotting method
+        if self.last_button_pressed == "profit":
+            self.plot_bar_chart_profit(data)
+        elif self.last_button_pressed == "highest_cost":
+            self.plot_bar_chart_highest_cost(data)
+        else:
+            print("No button pressed or unknown button.")
 
-    def plot_bar_chart(self, data):
+        # Add a new attribute to keep track of the last button pressed
+        self.last_button_pressed = None
+
+        # Modify the button commands to set the last_button_pressed attribute
+        self.profit_button = ttk.Button(self.master, text="Get Profit by Item", command=lambda: self.set_last_button_pressed("profit"), style="TButton")
+        self.highest_cost_button = ttk.Button(self.master, text="Highlight Highest Cost Items", command=lambda: self.set_last_button_pressed("highest_cost"), style="TButton")
+
+        # Add a new method to set the last_button_pressed attribute
+        def set_last_button_pressed(self, button_name):
+            self.last_button_pressed = button_name
+
+
+    def plot_bar_chart_profit(self, data):
         item_names = [row[1] for row in data]  # Assuming the item name is in the second column
         total_revenue = [row[4] for row in data]  # Assuming the total revenue is in the fifth column
 
@@ -216,20 +236,28 @@ class CoffeeShopGUI:
         if not item_names or not total_revenue:
             print("No data to plot.")
             return
+        
+        
 
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(15, 10))
+        
         ax.bar(item_names, total_revenue, color='blue')
         ax.set_xlabel('Item Name')
         ax.set_ylabel('Total Revenue')
         ax.set_title('Total Revenue by Item')
 
-        # Embed the Matplotlib figure in the Tkinter window
-        if hasattr(self, "canvas"):
-            self.canvas.get_tk_widget().destroy()  # Destroy any existing Matplotlib canvas
+        # Rotate x-axis labels for better readability
+        plt.xticks(rotation=45, ha="right", rotation_mode="anchor")
 
-        self.canvas = FigureCanvasTkAgg(fig, master=self.master)
-        self.canvas_widget = self.canvas.get_tk_widget()
-        self.canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+
+        # Destroy any existing Matplotlib canvas
+        for widget in self.canvas.winfo_children():
+            widget.destroy()
+
+        # Embed the Matplotlib figure in the Tkinter window
+        self.canvas_widget = FigureCanvasTkAgg(fig, master=self.canvas)
+        self.canvas_widget.draw()
+        self.canvas_widget.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
         # Ensure that the canvas is updated properly
         self.canvas_widget.draw()
@@ -238,8 +266,10 @@ class CoffeeShopGUI:
 
 
 
+
     def execute_query(self):
         # Execute a user-entered SQL query and display results
+
         user_input = self.text_area.get("1.0", tk.END).strip()
 
         if user_input.lower() == 'exit':
@@ -256,6 +286,7 @@ class CoffeeShopGUI:
 
     def get_profit_by_item(self):
         # Display profit information by item
+        self.set_last_button_pressed("profit")
         try:
             column_names, result = self.database.get_profit_by_item()
             if result is not None:
@@ -266,6 +297,7 @@ class CoffeeShopGUI:
 
     def highlight_highest_cost_items(self):
         # Highlight items with the highest cost to make
+        self.set_last_button_pressed("highest_cost")
         try:
             column_names, result = self.database.highlight_highest_cost_items()
             if result is not None:
@@ -273,6 +305,44 @@ class CoffeeShopGUI:
         except sqlite3.Error as e:
             self.result_tree.delete(*self.result_tree.get_children())
             print(f"Error executing query: {e}")
+
+    def plot_bar_chart_highest_cost(self, data):
+        item_names = [row[1] for row in data]  # Assuming the item name is in the second column
+        values = [row[2] for row in data]  # Assuming the cost is in the third column
+
+        # Check if both item_names and values are non-empty
+        if not item_names or not values:
+            print("No data to plot.")
+            return
+
+        # Set a larger figure size
+        fig, ax = plt.subplots(figsize=(15, 10))
+
+        bars = ax.bar(item_names, values, color='red')
+        ax.set_xlabel('Item Name')
+        ax.set_ylabel('Cost to Make')
+        ax.set_title('Highest Cost Items')  # Set a default title
+
+        # Rotate x-axis labels for better readability
+        plt.xticks(rotation=45, ha="right", rotation_mode="anchor")
+
+        # Destroy any existing Matplotlib canvas
+        for widget in self.canvas.winfo_children():
+            widget.destroy()
+
+        # Embed the Matplotlib figure in the Tkinter window
+        self.canvas_widget = FigureCanvasTkAgg(fig, master=self.canvas)
+        self.canvas_widget.draw()
+        self.canvas_widget.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+
+        # Ensure that the canvas is updated properly
+        self.canvas_widget.draw()
+        self.canvas_widget.flush_events()
+
+
+    def set_last_button_pressed(self, button_name):
+        # Set the last button pressed attribute
+        self.last_button_pressed = button_name
 
     def confirm_exit(self):
         # Confirm exit and close the application if confirmed
