@@ -6,7 +6,6 @@ import sqlite3
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-
 # Database class for managing SQLite database operations
 class Database:
     """
@@ -156,6 +155,9 @@ class CoffeeShopGUI:
         # Initialize the last_button_pressed attribute
         self.last_button_pressed = None
 
+        # Initialize the clear canvas widget
+        self.clear_canvas()
+
     def create_widgets(self):
         # Create a scrolled text area for user input
         self.text_area = scrolledtext.ScrolledText(self.master, wrap=tk.WORD, width=40, height=5)
@@ -179,7 +181,6 @@ class CoffeeShopGUI:
         self.exit_button = ttk.Button(self.master, text="Exit", command=self.confirm_exit, style="Exit.TButton")
         self.exit_button.pack(pady=5)
 
-
         # Create a Treeview widget for displaying query results
         self.result_tree = ttk.Treeview(self.master, columns=('Item ID', 'Item Name', 'Value'), show='headings')
         self.result_tree.heading('Item ID', text='Item ID')
@@ -192,6 +193,8 @@ class CoffeeShopGUI:
         self.canvas.pack(pady=10)
 
     def display_results(self, column_names, data):
+        # Clear the canvas
+        self.clear_canvas()
         # Display query results in the Treeview widget
         self.result_tree.delete(*self.result_tree.get_children())
 
@@ -223,11 +226,6 @@ class CoffeeShopGUI:
         self.profit_button = ttk.Button(self.master, text="Get Profit by Item", command=lambda: self.set_last_button_pressed("profit"), style="TButton")
         self.highest_cost_button = ttk.Button(self.master, text="Highlight Highest Cost Items", command=lambda: self.set_last_button_pressed("highest_cost"), style="TButton")
 
-        # Add a new method to set the last_button_pressed attribute
-        def set_last_button_pressed(self, button_name):
-            self.last_button_pressed = button_name
-
-
     def plot_bar_chart_profit(self, data):
         item_names = [row[1] for row in data]  # Assuming the item name is in the second column
         total_revenue = [row[4] for row in data]  # Assuming the total revenue is in the fifth column
@@ -237,8 +235,6 @@ class CoffeeShopGUI:
             print("No data to plot.")
             return
         
-        
-
         fig, ax = plt.subplots(figsize=(15, 10))
         
         ax.bar(item_names, total_revenue, color='blue')
@@ -249,6 +245,8 @@ class CoffeeShopGUI:
         # Rotate x-axis labels for better readability
         plt.xticks(rotation=45, ha="right", rotation_mode="anchor")
 
+        # Adjust the bottom margin to prevent x-axis labels from being cut off
+        plt.subplots_adjust(bottom=0.2)
 
         # Destroy any existing Matplotlib canvas
         for widget in self.canvas.winfo_children():
@@ -263,13 +261,8 @@ class CoffeeShopGUI:
         self.canvas_widget.draw()
         self.canvas_widget.flush_events()
 
-
-
-
-
     def execute_query(self):
         # Execute a user-entered SQL query and display results
-
         user_input = self.text_area.get("1.0", tk.END).strip()
 
         if user_input.lower() == 'exit':
@@ -326,6 +319,9 @@ class CoffeeShopGUI:
         # Rotate x-axis labels for better readability
         plt.xticks(rotation=45, ha="right", rotation_mode="anchor")
 
+        # Adjust the bottom margin to prevent x-axis labels from being cut off
+        plt.subplots_adjust(bottom=0.2)
+
         # Destroy any existing Matplotlib canvas
         for widget in self.canvas.winfo_children():
             widget.destroy()
@@ -339,10 +335,14 @@ class CoffeeShopGUI:
         self.canvas_widget.draw()
         self.canvas_widget.flush_events()
 
-
     def set_last_button_pressed(self, button_name):
         # Set the last button pressed attribute
         self.last_button_pressed = button_name
+
+    def clear_canvas(self):
+        # Destroy any existing Matplotlib canvas
+        for widget in self.canvas.winfo_children():
+            widget.destroy()
 
     def confirm_exit(self):
         # Confirm exit and close the application if confirmed
