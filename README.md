@@ -28,7 +28,7 @@ PBI: Priority
 
 - [x] Add a graph on one of the functions to display a profit vs time graph
   
-- [x] Adding graphing plotting profits over time
+- [x] Add graph plotting profits over time
   
 - [x] Add date to orders
   
